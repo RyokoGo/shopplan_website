@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Join your household on Shopplan</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; text-align: center; padding: 48px 20px; }
+    .code { font-size: 28px; font-weight: 800; letter-spacing: 4px; margin: 16px 0; }
+    a.button { display: inline-block; margin-top: 24px; padding: 14px 28px; border-radius: 10px; background: #2f6e3f; color: #fff; text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>Join your household on Shopplan</h1>
+  <p>Your invite code:</p>
+  <div class="code" id="code"></div>
+  <a class="button" href="https://apps.apple.com/app/idXXXXXXXXXX">Get it on the App Store</a><br />
+  <a class="button" href="https://play.google.com/store/apps/details?id=com.developrs.shopplan">Get it on Google Play</a>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    if (code) document.getElementById("code").textContent = code;
+    // Probeer alsnog de app te openen als hij wél geïnstalleerd is maar de
+    // Universal Link-verificatie (nog) niet aangeslagen is
+    if (code) window.location.href = `shopplan://join?code=${code}`;
+  </script>
+</body>
+</html>

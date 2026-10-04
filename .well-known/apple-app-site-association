@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["W7GD84NPPA.com.developrs.shopplan"],
+        "paths": ["/join", "/join/*"]
+      }
+    ]
+  }
+}

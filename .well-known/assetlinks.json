@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.developrs.shopplan",
+      "sha256_cert_fingerprints": [
+        "2E:DC:41:3C:A4:9B:D9:DB:3A:69:5C:D3:A4:27:AF:FF:37:98:95:E3:AC:B8:5A:90:F7:62:C0:2F:20:10:47:34"
+      ]
+    }
+  }
+]
