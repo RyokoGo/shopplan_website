@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shopplan</title>
+<meta name="description" content="Shopplan is the shared shopping list and recipe app for your household — import recipes by photo or link, plan meals together, and never forget the milk again.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%231F6E43'/%3E%3Cpath d='M6 12.5l4 4 8-9' stroke='white' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  /* Layout concept: asymmetric hero — left-aligned headline/copy, a tilted
+     paper "receipt" card on the right showing a real shared shopping list.
+     Left-aligned throughout; a numbered 3-step sequence for the one true
+     process (recipe → list); a plain feature list (not cards) below it. */
+  :root{
+    --bg:#F4F6EF;
+    --surface:#FFFFFF;
+    --fg:#15241C;
+    --fg-muted:#51604F;
+    --border:#DCE3D4;
+    --accent:#1F6E43;
+    --accent-ink:#F4F6EF;
+    --pop:#C94A2C;
+    --shadow: 0 18px 40px -22px rgba(21,36,28,.35);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#121810;
+      --surface:#1A2217;
+      --fg:#ECF1E6;
+      --fg-muted:#9FAD97;
+      --border:#2C3A28;
+      --accent:#6FCB9A;
+      --accent-ink:#0E1A12;
+      --pop:#FF8A63;
+      --shadow: 0 18px 40px -22px rgba(0,0,0,.6);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#121810;
+    --surface:#1A2217;
+    --fg:#ECF1E6;
+    --fg-muted:#9FAD97;
+    --border:#2C3A28;
+    --accent:#6FCB9A;
+    --accent-ink:#0E1A12;
+    --pop:#FF8A63;
+    --shadow: 0 18px 40px -22px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; }
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:'Inter', system-ui, sans-serif;
+    padding-inline:20px;
+    -webkit-font-smoothing:antialiased;
+  }
+  main{ max-width:1080px; margin-inline:auto; }
+  img{ max-width:100%; }
+  a{ color:inherit; }
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:600;
+    line-height:1.08;
+    text-wrap:balance;
+    margin:0;
+  }
+  p{ margin:0; }
+
+  header{
+    max-width:1080px;
+    margin-inline:auto;
+    padding-block:28px 0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .wordmark{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:700;
+    font-size:1.25rem;
+    letter-spacing:-.01em;
+  }
+  header a.nav-cta{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:.92rem;
+    padding:9px 16px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    text-decoration:none;
+  }
+  header a.nav-cta:hover{ border-color:var(--accent); }
+
+  /* ---------- hero ---------- */
+  .hero{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:56px;
+    align-items:center;
+    padding-block:64px 48px;
+  }
+  @media (max-width:760px){
+    .hero{ grid-template-columns:1fr; padding-block:40px 24px; gap:40px; }
+  }
+  .hero h1{
+    font-size:clamp(2.4rem, 5vw, 3.6rem);
+    letter-spacing:-.01em;
+  }
+  .lede{
+    margin-top:20px;
+    max-width:46ch;
+    font-size:1.1rem;
+    line-height:1.55;
+    color:var(--fg-muted);
+  }
+  .cta-row{
+    margin-top:32px;
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:.98rem;
+    padding:13px 22px;
+    border-radius:11px;
+    text-decoration:none;
+    border:1px solid transparent;
+  }
+  .btn-primary{ background:var(--accent); color:var(--accent-ink); }
+  .btn-primary:hover{ filter:brightness(1.06); }
+  .btn-ghost{ border-color:var(--border); }
+  .btn-ghost:hover{ border-color:var(--accent); }
+
+  /* ---------- receipt card ---------- */
+  .hero-receipt{ display:flex; justify-content:center; }
+  .receipt{
+    background:var(--surface);
+    width:min(300px, 100%);
+    padding:26px 22px 0;
+    border-radius:10px 10px 0 0;
+    box-shadow:var(--shadow);
+    transform:rotate(-2.5deg);
+    animation:settle .6s ease-out;
+  }
+  @media (prefers-reduced-motion:reduce){ .receipt{ animation:none; } }
+  @keyframes settle{
+    from{ transform:rotate(-2.5deg) translateY(10px); opacity:0; }
+    to{ transform:rotate(-2.5deg) translateY(0); opacity:1; }
+  }
+  .receipt-title{
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:.8rem;
+    letter-spacing:.02em;
+    color:var(--fg-muted);
+    padding-bottom:14px;
+    border-bottom:1px dashed var(--border);
+  }
+  .receipt-items{
+    list-style:none;
+    margin:0;
+    padding:16px 0 8px;
+    display:flex;
+    flex-direction:column;
+    gap:13px;
+  }
+  .receipt-items li{
+    display:flex;
+    align-items:baseline;
+    gap:9px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:.85rem;
+  }
+  .box{
+    flex:none;
+    width:15px; height:15px;
+    border:1.6px solid var(--fg-muted);
+    border-radius:3px;
+    position:relative;
+    top:1px;
+  }
+  li.checked .box{
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+  li.checked .box::after{
+    content:"";
+    position:absolute;
+    left:3px; top:0px;
+    width:4px; height:8px;
+    border:solid var(--accent-ink);
+    border-width:0 2px 2px 0;
+    transform:rotate(40deg);
+  }
+  li.checked .item{ color:var(--fg-muted); text-decoration:line-through; text-decoration-color:var(--border); }
+  .item{ white-space:nowrap; }
+  .dots{
+    flex:1 1 auto;
+    min-width:8px;
+    border-bottom:1px dotted var(--border);
+    height:1px;
+    transform:translateY(-3px);
+  }
+  .qty{ font-variant-numeric:tabular-nums; color:var(--fg-muted); white-space:nowrap; }
+  .receipt-foot{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:.72rem;
+    color:var(--fg-muted);
+    padding:12px 0 16px;
+    border-top:1px dashed var(--border);
+  }
+  .receipt-tear{
+    height:14px;
+    background-image:
+      linear-gradient(135deg, var(--surface) 50%, transparent 50%),
+      linear-gradient(45deg, var(--surface) 50%, transparent 50%);
+    background-size:14px 14px;
+    background-position:0 0, 7px 0;
+    background-repeat:repeat-x;
+    filter:drop-shadow(0 6px 4px rgba(21,36,28,.12));
+  }
+
+  /* ---------- sections ---------- */
+  section{ padding-block:56px; }
+  section h2{
+    font-size:clamp(1.6rem, 3vw, 2.1rem);
+    max-width:20ch;
+  }
+
+  .steps ol{
+    list-style:none;
+    margin:36px 0 0;
+    padding:0;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:36px;
+  }
+  @media (max-width:760px){ .steps ol{ grid-template-columns:1fr; } }
+  .steps li{ display:flex; flex-direction:column; gap:12px; }
+  .steps .num{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:1.6rem;
+    color:var(--accent);
+  }
+  .steps h3{ font-size:1.1rem; font-weight:600; }
+  .steps p{ color:var(--fg-muted); line-height:1.5; font-size:.96rem; }
+
+  .features ul{
+    list-style:none;
+    margin:36px 0 0;
+    padding:0;
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:28px 40px;
+  }
+  @media (max-width:760px){ .features ul{ grid-template-columns:1fr; } }
+  .features li{
+    padding-top:18px;
+    border-top:1px solid var(--border);
+  }
+  .features h3{ font-size:1.04rem; font-weight:600; margin-bottom:8px; }
+  .features p{ color:var(--fg-muted); line-height:1.5; font-size:.96rem; }
+
+  .get-app{ text-align:left; }
+  .get-app p{ margin-top:10px; color:var(--fg-muted); }
+  .store-row{ margin-top:26px; display:flex; gap:14px; flex-wrap:wrap; }
+  .store-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:var(--fg);
+    color:var(--bg);
+    padding:11px 20px;
+    border-radius:10px;
+    text-decoration:none;
+    font-weight:600;
+    font-size:.94rem;
+  }
+  .store-btn svg{ flex:none; }
+
+  footer{
+    max-width:1080px;
+    margin-inline:auto;
+    padding-block:32px 48px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-top:1px solid var(--border);
+    color:var(--fg-muted);
+    font-size:.88rem;
+  }
+  footer a{ text-decoration:underline; text-underline-offset:3px; }
+
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="wordmark">Shopplan</span>
+  <a class="nav-cta" href="#get-app">Get the app</a>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <h1>One list.<br>Everyone's kitchen.</h1>
+      <p class="lede">Shopplan keeps your household's groceries, recipes, and meal plan in one shared list that updates the moment someone adds milk.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#get-app">Get the app</a>
+        <a class="btn btn-ghost" href="#how-it-works">See how it works</a>
+      </div>
+    </div>
+    <div class="hero-receipt" aria-hidden="true">
+      <div>
+        <div class="receipt">
+          <p class="receipt-title">Shopping list</p>
+          <ul class="receipt-items">
+            <li class="checked"><span class="box"></span><span class="item">Tomatoes</span><span class="dots"></span><span class="qty">6</span></li>
+            <li><span class="box"></span><span class="item">Pasta</span><span class="dots"></span><span class="qty">2 pk</span></li>
+            <li><span class="box"></span><span class="item">Fresh basil</span><span class="dots"></span><span class="qty">1 bunch</span></li>
+            <li class="checked"><span class="box"></span><span class="item">Olive oil</span><span class="dots"></span><span class="qty">1</span></li>
+          </ul>
+          <p class="receipt-foot">Added by Mom · just now</p>
+        </div>
+        <div class="receipt-tear"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works" class="steps">
+    <h2>From recipe to cart</h2>
+    <ol>
+      <li>
+        <span class="num">1</span>
+        <h3>Snap a photo or paste a link</h3>
+        <p>Shopplan reads the recipe and pulls out every ingredient, in any of four languages.</p>
+      </li>
+      <li>
+        <span class="num">2</span>
+        <h3>Add it to your list</h3>
+        <p>Amounts merge automatically, whether your household measures in grams or cups.</p>
+      </li>
+      <li>
+        <span class="num">3</span>
+        <h3>Shop together</h3>
+        <p>Everyone in the household sees the same list, updated the moment someone checks something off.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="features">
+    <h2>Built for real kitchens</h2>
+    <ul>
+      <li>
+        <h3>Shared with your household</h3>
+        <p>Invite people with a six-character code. Everyone stays in sync, on every phone.</p>
+      </li>
+      <li>
+        <h3>Works without signal</h3>
+        <p>Your list is there even in the back aisle with no bars — it syncs again once you're back online.</p>
+      </li>
+      <li>
+        <h3>Speaks your units</h3>
+        <p>Grams and litres, or cups and pounds — Shopplan keeps each household's own units straight.</p>
+      </li>
+      <li>
+        <h3>Recipes become meals</h3>
+        <p>Save recipes, plan the week, and shop once for everything on the menu.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="get-app" class="get-app">
+    <h2>Get Shopplan</h2>
+    <p>Free to start, with optional Pro features for bigger households.</p>
+    <div class="store-row">
+      <a class="store-btn" href="#">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.365 1.43c0 1.14-.42 2.1-1.26 2.94-.93.93-2.01 1.47-3.15 1.38-.12-1.08.39-2.19 1.26-3.06.9-.93 2.07-1.47 3.15-1.26ZM20.1 17.1c-.48 1.08-.72 1.56-1.35 2.52-.87 1.32-2.1 2.97-3.63 2.97-1.35.03-1.71-.87-3.54-.87-1.83 0-2.25.84-3.54.9-1.5.06-2.64-1.44-3.51-2.76-1.95-2.94-2.19-6.42-.96-8.28.87-1.32 2.25-2.1 3.54-2.1 1.32 0 2.16.9 3.24.9 1.05 0 1.71-.9 3.24-.9 1.08 0 2.25.6 3.09 1.62-2.73 1.5-2.28 5.4.42 6.0Z"/></svg>
+        App Store
+      </a>
+      <a class="store-btn" href="https://play.google.com/store/apps/details?id=com.developrs.shopplan">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M4 2.9c-.28.3-.44.76-.44 1.35v15.5c0 .59.16 1.05.44 1.35l.1.08L13.7 11.5v-.2L4.1 2.82 4 2.9Z"/><path d="M16.9 14.7 13.7 11.5v-.2l3.2-3.2 7.1 4.03c.97.56.97 1.47 0 2.03L16.9 14.7Z" opacity=".75"/></svg>
+        Google Play
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Shopplan</span>
+  <a href="/privacy">Privacy policy</a>
+</footer>
+
+</body>
+</html>
